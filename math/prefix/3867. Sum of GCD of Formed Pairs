@@ -1,0 +1,211 @@
+# 3867. Sum of GCD of Formed Pairs
+
+**Difficulty:** Medium  
+**Topics:** Math, GCD (Euclidean Algorithm), Sorting, Two Pointers
+
+---
+
+## Intuition
+
+The problem can be divided into **three simple steps**:
+
+1. Construct the `prefixGcd` array.
+2. Sort the array.
+3. Pair the smallest and largest elements, compute their GCD, and sum the results.
+
+The only important part is efficiently computing the **Greatest Common Divisor (GCD)**, which is done using the **Euclidean Algorithm**.
+
+---
+
+## Euclidean Algorithm (GCD)
+
+The GCD of two numbers can be computed using the following observation:
+
+```
+gcd(a, b) = gcd(b, a % b)
+```
+
+Repeat this until `b` becomes `0`.
+
+The remaining value of `a` is the GCD.
+
+### Example
+
+Find `gcd(48, 18)`:
+
+```
+gcd(48,18)
+
+48 % 18 = 12
+gcd(18,12)
+
+18 % 12 = 6
+gcd(12,6)
+
+12 % 6 = 0
+gcd(6,0)
+
+Answer = 6
+```
+
+### Java Implementation
+
+```java
+public int gcd(int a, int b) {
+    while (b != 0) {
+        int temp = b;
+        b = a % b;
+        a = temp;
+    }
+    return a;
+}
+```
+
+**Complexity:** `O(log(min(a, b)))`
+
+---
+
+## Approach
+
+### Step 1: Construct `prefixGcd`
+
+Maintain the maximum element seen so far.
+
+```
+mx = max(nums[0...i])
+
+prefixGcd[i] = gcd(nums[i], mx)
+```
+
+### Example
+
+```
+nums = [2,6,4]
+
+i = 0
+mx = 2
+gcd(2,2) = 2
+
+i = 1
+mx = 6
+gcd(6,6) = 6
+
+i = 2
+mx = 6
+gcd(4,6) = 2
+
+prefixGcd = [2,6,2]
+```
+
+---
+
+### Step 2: Sort
+
+```
+Before: [2,6,2]
+
+After:
+
+[2,2,6]
+```
+
+---
+
+### Step 3: Form Pairs
+
+Always pair:
+
+- Smallest element
+- Largest element
+
+```
+[2,2,6]
+
+Pair:
+
+(2,6)
+
+gcd(2,6)=2
+
+Middle element (2) remains unpaired.
+
+Answer = 2
+```
+
+---
+
+## Algorithm
+
+1. Traverse the array while maintaining the maximum element.
+2. Compute `prefixGcd[i] = gcd(nums[i], maxSoFar)`.
+3. Sort the `prefixGcd` array.
+4. Use two pointers:
+   - `l` → smallest element
+   - `r` → largest element
+5. Add `gcd(prefixGcd[l], prefixGcd[r])` to the answer.
+6. Continue until all possible pairs are formed.
+
+---
+
+## Complexity
+
+- Building `prefixGcd`: **O(n log M)** (`M` = maximum value in `nums`)
+- Sorting: **O(n log n)**
+- Pairing: **O(n log M)**
+
+**Overall Time Complexity:** `O(n log n + n log M)`
+
+**Space Complexity:** `O(n)`
+
+---
+
+## Java Solution
+
+```java
+class Solution {
+
+    public int gcd(int a, int b) {
+        while (b != 0) {
+            int temp = b;
+            b = a % b;
+            a = temp;
+        }
+        return a;
+    }
+
+    public long gcdSum(int[] nums) {
+        int n = nums.length;
+        int[] prefix = new int[n];
+
+        int maxSoFar = 0;
+
+        // Build prefixGcd array
+        for (int i = 0; i < n; i++) {
+            maxSoFar = Math.max(maxSoFar, nums[i]);
+            prefix[i] = gcd(nums[i], maxSoFar);
+        }
+
+        Arrays.sort(prefix);
+
+        long ans = 0;
+        int l = 0;
+        int r = n - 1;
+
+        while (l < r) {
+            ans += gcd(prefix[l++], prefix[r--]);
+        }
+
+        return ans;
+    }
+}
+```
+
+---
+
+## Key Takeaways
+
+- **Euclidean Algorithm** computes GCD efficiently in `O(log(min(a, b)))`.
+- Build the `prefixGcd` array by maintaining the maximum element seen so far.
+- Sort the array before forming pairs.
+- Pair the **smallest** and **largest** remaining elements using two pointers.
+- If the array length is odd, the middle element is ignored as specified.
