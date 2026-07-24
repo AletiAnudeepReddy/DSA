@@ -1,0 +1,184 @@
+# 235. Lowest Common Ancestor of a Binary Search Tree
+
+**Difficulty:** Medium  
+**Topic:** Binary Search Tree (BST)
+
+---
+
+## Intuition
+
+In a Binary Search Tree (BST):
+
+- Left subtree contains values **smaller** than the current node.
+- Right subtree contains values **greater** than the current node.
+
+Using this property, we can determine where both nodes (`p` and `q`) lie.
+
+- If both nodes are smaller than the current node, the LCA must be in the left subtree.
+- If both nodes are greater than the current node, the LCA must be in the right subtree.
+- Otherwise, the current node is the point where the paths to `p` and `q` diverge, making it the Lowest Common Ancestor.
+
+---
+
+## Approach
+
+- Start from the root.
+- Compare the values of `p` and `q` with the current node.
+- If both are smaller, move to the left subtree.
+- If both are greater, move to the right subtree.
+- Otherwise, return the current node as the LCA.
+
+---
+
+## Example
+
+```
+          6
+        /   \
+       2     8
+      / \   / \
+     0   4 7   9
+        / \
+       3   5
+```
+
+Suppose
+
+```
+p = 2
+q = 8
+```
+
+At root = 6
+
+```
+2 < 6
+8 > 6
+```
+
+One node is on the left and the other is on the right.
+
+So,
+
+```
+LCA = 6
+```
+
+---
+
+### Another Example
+
+```
+          6
+        /   \
+       2     8
+      / \
+     0   4
+        / \
+       3   5
+```
+
+Suppose
+
+```
+p = 3
+q = 5
+```
+
+At root = 6
+
+```
+Both are smaller
+```
+
+Move left.
+
+Current node = 2
+
+```
+Both are greater
+```
+
+Move right.
+
+Current node = 4
+
+```
+3 < 4
+5 > 4
+```
+
+The paths split here.
+
+```
+LCA = 4
+```
+
+---
+
+## Algorithm
+
+1. If the root is `null`, return `null`.
+2. Let `curr = root.val`.
+3. If both `p` and `q` are greater than `curr`, recurse on the right subtree.
+4. If both `p` and `q` are smaller than `curr`, recurse on the left subtree.
+5. Otherwise, return the current node.
+
+---
+
+## Code (Java)
+
+```java
+class Solution {
+
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+
+        if (root == null) {
+            return null;
+        }
+
+        int curr = root.val;
+
+        if (curr < p.val && curr < q.val) {
+            return lowestCommonAncestor(root.right, p, q);
+        }
+
+        if (curr > p.val && curr > q.val) {
+            return lowestCommonAncestor(root.left, p, q);
+        }
+
+        return root;
+    }
+}
+```
+
+---
+
+## Complexity Analysis
+
+- **Time Complexity:** `O(H)`
+  - `H` is the height of the BST.
+  - Balanced BST: `O(log n)`
+  - Skewed BST: `O(n)`
+
+- **Space Complexity:** `O(H)`
+  - Due to recursion stack.
+
+---
+
+## Comparison with Binary Tree LCA
+
+| Binary Tree | Binary Search Tree |
+|-------------|--------------------|
+| Search both left and right subtrees | Use BST property to move in only one direction |
+| Time: `O(n)` | Time: `O(H)` |
+| No ordering property | Uses BST ordering |
+
+---
+
+## Key Takeaways
+
+- The BST property allows us to search only one path instead of both subtrees.
+- If both nodes are on the same side, continue searching in that subtree.
+- The first node where the paths diverge is the Lowest Common Ancestor.
+- This is much more efficient than the general Binary Tree LCA solution.
