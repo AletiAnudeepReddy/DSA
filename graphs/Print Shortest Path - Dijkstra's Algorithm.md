@@ -466,3 +466,670 @@ dist[1] = 0;
 because the distance from the source to itself is zero.
 
 ---
+
+## Parent Array
+
+Initially:
+
+```java
+parent[i] = i;
+```
+
+For example:
+
+```text
+parent[1] = 1
+parent[2] = 2
+parent[3] = 3
+parent[4] = 4
+parent[5] = 5
+```
+
+As we discover shorter paths, we change these values.
+
+---
+
+# 9. Dry Run
+
+Consider this graph:
+
+```text
+        2
+   1 -------- 2
+   |          |
+  4|          |1
+   |          |
+   3 -------- 4
+        2     |
+              | 3
+              |
+              5
+```
+
+Edges:
+
+```text
+1 → 2 = 2
+1 → 3 = 4
+2 → 4 = 1
+3 → 4 = 2
+4 → 5 = 3
+```
+
+Source:
+
+```text
+1
+```
+
+Destination:
+
+```text
+5
+```
+
+---
+
+## Initial State
+
+Distance:
+
+```text
+dist = [∞, 0, ∞, ∞, ∞, ∞]
+```
+
+Parent:
+
+```text
+parent = [_, 1, 2, 3, 4, 5]
+```
+
+PriorityQueue:
+
+```text
+(0, 1)
+```
+
+---
+
+## Step 1: Process Node 1
+
+Current:
+
+```text
+node = 1
+distance = 0
+```
+
+Neighbors:
+
+```text
+1 → 2 = 2
+1 → 3 = 4
+```
+
+### Neighbor 2
+
+Calculate:
+
+```text
+0 + 2 = 2
+```
+
+Since:
+
+```text
+2 < ∞
+```
+
+update:
+
+```text
+dist[2] = 2
+parent[2] = 1
+```
+
+Queue:
+
+```text
+(2, 2)
+```
+
+### Neighbor 3
+
+Calculate:
+
+```text
+0 + 4 = 4
+```
+
+Update:
+
+```text
+dist[3] = 4
+parent[3] = 1
+```
+
+Queue:
+
+```text
+(2, 2)
+(4, 3)
+```
+
+---
+
+## Step 2: Process Node 2
+
+Smallest distance:
+
+```text
+(2, 2)
+```
+
+So:
+
+```text
+node = 2
+distance = 2
+```
+
+Neighbor:
+
+```text
+2 → 4 = 1
+```
+
+Calculate:
+
+```text
+2 + 1 = 3
+```
+
+Since:
+
+```text
+3 < ∞
+```
+
+update:
+
+```text
+dist[4] = 3
+parent[4] = 2
+```
+
+Queue:
+
+```text
+(3, 4)
+(4, 3)
+```
+
+---
+
+## Step 3: Process Node 4
+
+Current:
+
+```text
+distance = 3
+node = 4
+```
+
+Edge:
+
+```text
+4 → 5 = 3
+```
+
+Calculate:
+
+```text
+3 + 3 = 6
+```
+
+Update:
+
+```text
+dist[5] = 6
+parent[5] = 4
+```
+
+Now:
+
+```text
+parent[5] = 4
+parent[4] = 2
+parent[2] = 1
+```
+
+---
+
+# 10. Reconstructing the Path
+
+Now we know:
+
+```text
+parent[5] = 4
+parent[4] = 2
+parent[2] = 1
+parent[1] = 1
+```
+
+Start from destination:
+
+```text
+node = 5
+```
+
+### First iteration
+
+```text
+path.add(5)
+node = parent[5]
+     = 4
+```
+
+Path:
+
+```text
+[5]
+```
+
+### Second iteration
+
+```text
+path.add(4)
+node = parent[4]
+     = 2
+```
+
+Path:
+
+```text
+[5, 4]
+```
+
+### Third iteration
+
+```text
+path.add(2)
+node = parent[2]
+     = 1
+```
+
+Path:
+
+```text
+[5, 4, 2]
+```
+
+Now:
+
+```text
+parent[1] == 1
+```
+
+Stop.
+
+Add `1`:
+
+```text
+[5, 4, 2, 1]
+```
+
+But this is backwards.
+
+So:
+
+```java
+Collections.reverse(path);
+```
+
+Final:
+
+```text
+[1, 2, 4, 5]
+```
+
+Therefore the shortest path is:
+
+```text
+1 → 2 → 4 → 5
+```
+
+with distance:
+
+```text
+2 + 1 + 3 = 6
+```
+
+---
+
+# 11. Why `parent[node] != node`?
+
+This condition:
+
+```java
+while (parent[node] != node)
+```
+
+is used to stop when we reach the source.
+
+Initially:
+
+```text
+parent[1] = 1
+```
+
+Therefore, when:
+
+```text
+node = 1
+```
+
+we have:
+
+```text
+parent[1] == 1
+```
+
+and the loop stops.
+
+This is why initializing:
+
+```java
+parent[i] = i;
+```
+
+is useful.
+
+---
+
+# 12. Why Do We Reverse the Path?
+
+Dijkstra calculates the shortest path starting from:
+
+```text
+1 → ... → n
+```
+
+But when reconstructing, we start from the destination:
+
+```text
+n
+```
+
+and follow the parents backwards:
+
+```text
+n → parent[n] → parent[parent[n]] → ... → 1
+```
+
+So we initially get:
+
+```text
+n → ... → 1
+```
+
+Therefore we use:
+
+```java
+Collections.reverse(path);
+```
+
+to obtain:
+
+```text
+1 → ... → n
+```
+
+---
+
+# 13. Important Difference From Normal Dijkstra
+
+### Normal Dijkstra
+
+We only maintain:
+
+```text
+dist[]
+```
+
+because we only care about the shortest distances.
+
+### Print Shortest Path
+
+We maintain:
+
+```text
+dist[]
+parent[]
+```
+
+because:
+
+```text
+dist[]   → tells us the shortest distance
+parent[] → tells us the actual path
+```
+
+So remember:
+
+```text
+Dijkstra
+   ↓
+Find shortest distance
+
+Dijkstra + parent[]
+   ↓
+Find shortest distance
+   +
+Reconstruct shortest path
+```
+
+---
+
+# 14. Time Complexity
+
+Let:
+
+```text
+n = number of vertices
+m = number of edges
+```
+
+### Building adjacency list
+
+Every edge is added twice because the graph is undirected:
+
+```text
+O(m)
+```
+
+### Dijkstra
+
+Each edge can be relaxed and PriorityQueue operations take:
+
+```text
+O(log n)
+```
+
+Therefore:
+
+```text
+O((n + m) log n)
+```
+
+For a connected graph, this is commonly written as:
+
+```text
+O(m log n)
+```
+
+### Path Reconstruction
+
+We follow the parent pointers from `n` to `1`.
+
+In the worst case:
+
+```text
+O(n)
+```
+
+This does not change the overall complexity.
+
+### Final Time Complexity
+
+```text
+O((n + m) log n)
+```
+
+---
+
+# 15. Space Complexity
+
+We use:
+
+```text
+Adjacency List → O(n + m)
+dist[]          → O(n)
+parent[]        → O(n)
+PriorityQueue   → O(m) worst case
+path            → O(n)
+```
+
+Therefore:
+
+```text
+Space Complexity = O(n + m)
+```
+
+---
+
+# 16. Key Takeaways
+
+### 1. Dijkstra finds the shortest distance
+
+```text
+dist[node]
+```
+
+stores the minimum distance from source `1` to that node.
+
+---
+
+### 2. `parent[]` is used to reconstruct the path
+
+Whenever we find a better path:
+
+```java
+parent[adjNode] = node;
+```
+
+This means:
+
+> "The shortest path to `adjNode` currently comes through `node`."
+
+---
+
+### 3. Reconstruct from destination
+
+Start:
+
+```java
+node = n;
+```
+
+Then:
+
+```text
+n
+↓
+parent[n]
+↓
+parent[parent[n]]
+↓
+...
+↓
+1
+```
+
+---
+
+### 4. Reverse the result
+
+Because reconstruction happens backwards:
+
+```text
+n → ... → 1
+```
+
+we use:
+
+```java
+Collections.reverse(path);
+```
+
+to get:
+
+```text
+1 → ... → n
+```
+
+---
+
+### 5. If destination is unreachable
+
+Check:
+
+```java
+if (dist[n] == 1e9)
+```
+
+and return:
+
+```text
+[-1]
+```
+
+---
+
+### 6. The most important pattern to remember
+
+```text
+PriorityQueue
+      ↓
+Dijkstra
+      ↓
+Relax edge
+      ↓
+Update dist[]
+      ↓
+Update parent[]
+      ↓
+Start from destination
+      ↓
+Follow parent[]
+      ↓
+Reverse path
+      ↓
+Shortest Path
+```
+
+### Final Formula
+
+```text
+if (dis + edgeWeight < dist[adjNode]) {
+
+    dist[adjNode] = dis + edgeWeight;
+
+    parent[adjNode] = node;
+
+    pq.add(new Pair(dist[adjNode], adjNode));
+}
+```
+
+**`dist[]` tells you how short the path is.
+`parent[]` tells you which path to take.**
